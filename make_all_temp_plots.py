@@ -18,7 +18,7 @@ plot_list = ['hall', 'laser_hut', 'magnetA', 'magnetB', 'magnetC', 'magnetD', 'm
 #plot_list = ['magnetA', 'magnetB']
 
 # which time interval plots to make
-interval_list = ['all', 'week', 'day']
+interval_list = ['week', 'day']
 
 leg_dict = {}
 
@@ -36,6 +36,6 @@ for plot in plot_list:
             #print i
         #leg_dict[ (plot, interval) ].Draw()
 
-        canvas.SaveAs(plot + '_' + interval + '.pdf')
+        canvas.SaveAs(plot + '_' + interval + '.png')
 
     
