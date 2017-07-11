@@ -15,7 +15,8 @@ gr = ROOT.TGraph()
 
 
 def get_connection():
-    return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader host=localhost port=5433")
+    return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader password=XXX host=ifdbprod.fnal.gov port=5452")
+    #return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader host=localhost port=5433")
 
 
 def plot_subchannel(channel='test_channel', index=0, time_interval='all'):
