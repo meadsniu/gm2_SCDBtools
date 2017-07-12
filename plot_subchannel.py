@@ -13,7 +13,7 @@ import ROOT
 
 gr = ROOT.TGraph()
 
-do_calib = True
+do_calib = False
 calib = {}
 
 
