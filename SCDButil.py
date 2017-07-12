@@ -107,7 +107,7 @@ class SCDButil:
         if db == 'online':
             params = 'dbname=gm2_online_prod user=gm2_reader host=localhost port=5433'
         elif db == 'offline':
-            params = 'dbname=gm2_online_prod user=gm2_reader password=gm2_4_reader host=ifdbprod.fnal.gov port=5452'
+            params = 'dbname=gm2_online_prod user=gm2_reader password=XXX host=ifdbprod.fnal.gov port=5452'
         else:
             print 'Unknown database:', db
         self.conn = psycopg2.connect(params)

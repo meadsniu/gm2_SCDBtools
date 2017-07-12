@@ -15,7 +15,7 @@ write_to_db = True
 # create the connection to the database
 conn = psycopg2.connect("dbname=gm2_online_prod user=gm2_writer host=localhost port=5433")
 
-infile = open('SubchannelCailbrationBreakdown_7-11_Updated.csv')
+infile = open('SubchannelCailbrationBreakdown_7-11_Fitted.csv')
 
 for line in infile:
     if line.split(',')[1] == 'test_channel': continue
