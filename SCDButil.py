@@ -79,7 +79,13 @@ class SCDButil:
                    ('mscb110_Temp_P1', 3):ROOT.kBlue,
                    ('mscb110_Temp_P1', 4):ROOT.kBlue+1,
                    ('mscb110_Temp_P1', 5):ROOT.kBlue+2,
-                   ('mscb110_Temp_P1', 6):ROOT.kBlue+3
+                   ('mscb110_Temp_P1', 6):ROOT.kBlue+3, 
+                   ('mscb13e_ADC_P0', 2):ROOT.kBlue,
+                   ('mscb174_ADC_P0', 7):ROOT.kBlue+1,
+                   ('mscb110_ADC_P0', 1):ROOT.kBlue+2,
+                   ('mscb13e_ADC_P0', 0):ROOT.kBlue,
+                   ('mscb174_ADC_P0', 5):ROOT.kBlue+1,
+                   ('mscb110_ADC_P0', 0):ROOT.kBlue+2,
                  }
 
     # dictionary to hold the list of subchannels for specific plots
@@ -97,6 +103,8 @@ class SCDButil:
     subchannel_dict['magnetH'] = [ ('mscb13e_Temp_P2', 4), ('mscb13e_Temp_P2', 5), ('mscb13e_Temp_P2', 6), ('mscb13e_Temp_P2', 7) ]
     subchannel_dict['magnetI'] = [ ('mscb323_Temp_P3', 0), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 2), ('mscb323_Temp_P3', 3) ]
     subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 0), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
+    subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1) ]
+    subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0) ]
 
     # calibration dictionary to hold the calibration values
     calib_dict = {}
@@ -113,6 +121,7 @@ class SCDButil:
         self.conn = psycopg2.connect(params)
 
         self.calib = calib
+        # pull out the temperature calibration numbers
         if (self.calib):
             sql = 'SELECT subchannel, calib_value  FROM g2sc_calib_temp WHERE "isValid"=true ; '
             cur = self.conn.cursor()
@@ -127,6 +136,22 @@ class SCDButil:
                 index = int(subchannel.split('_')[-1])
                 channel = subchannel[:-2]
                 self.calib_dict[ (channel, index) ] = value
+
+            # pull out the humidity/pressure calibration numbers
+            sql = 'SELECT subchannel, calib_slope, calib_intercept  FROM g2sc_calib_adc WHERE "isValid"=true ; '
+            cur = self.conn.cursor()
+            cur.execute(sql)
+
+            while True:
+                entry = cur.fetchone()
+                if not entry: 
+                    break
+                subchannel = entry[0]
+                slope = entry[1]
+                intercept = entry[2]
+                index = int(subchannel.split('_')[-1])
+                channel = subchannel[:-2]
+                self.calib_dict[ (channel, index) ] = (slope, intercept)
 
     def execute_query(self, sql):
         cur = self.conn.cursor()
@@ -202,11 +227,11 @@ class SCDButil:
     def get_graph(self, channel, index, checkGood=True, time_interval='all', scale_overflow=True):
         cur = self.execute_query(self.generate_sql_channel(channel=channel, checkGood=checkGood, time_interval=time_interval))
 
-        cal = 0.0
-        if self.calib:
-            if (channel, index) in self.calib_dict.keys():
-                cal = self.calib_dict[ (channel, index) ]
-            print 'found calibration:', channel, index, cal
+        #cal = 0.0
+        #if self.calib:
+        #    if (channel, index) in self.calib_dict.keys():
+        #        cal = self.calib_dict[ (channel, index) ]
+        #    print 'found calibration:', channel, index, cal
 
         gr = ROOT.TGraph()
         i = 0
@@ -216,12 +241,31 @@ class SCDButil:
                 break
 
             value = entry[2][index]
-            if value < -10.:
-                value = 25.
-            elif value > 50.:
-                value = 25.
 
-            gr.SetPoint(i, time.mktime(entry[3].timetuple()), value-cal)
+            if scale_overflow == True:
+                # for adc channels, should be between 0 and 5
+                if channel.find('ADC') != -1:
+                    if (value < 0.0) or (value > 5.0):
+                        value = 0.0;
+                # for temp channels, set to 25
+                else:
+                    if value < -10.:
+                        value = 25.
+                    elif value > 50.:
+                        value = 25.
+
+            if channel.find('Temp') != -1:
+                if (channel, index) in self.calib_dict.keys():
+                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), value-self.calib_dict[ (channel, index) ])
+                else:
+                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), value)
+            elif channel.find('ADC') != -1:
+                if (channel, index) in self.calib_dict.keys():    
+                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), self.calib_dict[ (channel, index) ][0]*value+self.calib_dict[ (channel, index) ][1])
+                else:
+                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), value)
+            else:
+                gr.SetPoint(i, time.mktime(entry[3].timetuple()), value)
             i += 1
 
         return gr
@@ -332,9 +376,19 @@ class SCDButil:
 
         yaxis_title = 'value'
         if subchannel_list[0][0].find('Temp') != -1:
-            yaxis_title = 'Temperature (#circ C)'
+            if self.calib == False:
+                yaxis_title = 'Temp(raw) (#circ C)'
+            else:
+                yaxis_title = 'Temp(calib) (#circ C)'
         elif subchannel_list[0][0].find('ADC') != -1:
-            yaxis_title = 'ADC value (Volts)'
+            if self.calib == False:
+                yaxis_title = 'ADC value (Volts)'
+            elif subchannel_list[0] in self.subchannel_dict['humidity']:
+                yaxis_title = 'Relative Humidity (%)'
+            elif subchannel_list[0] in self.subchannel_dict['pressure']:
+                yaxis_title = 'Air Pressure (mbar)'
+            else:
+                yaxis_title = 'ADC value (Volts)'
         mg.GetYaxis().SetTitle(yaxis_title)
         mg.GetYaxis().SetTitleOffset(1.3)
 
