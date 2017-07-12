@@ -98,16 +98,35 @@ class SCDButil:
     subchannel_dict['magnetI'] = [ ('mscb323_Temp_P3', 0), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 2), ('mscb323_Temp_P3', 3) ]
     subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 0), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
 
-    def __init__(self, db='online'):
+    # calibration dictionary to hold the calibration values
+    calib_dict = {}
+
+    def __init__(self, db='online', calib = False):
         # initialize the database connection
         params = ""
         if db == 'online':
             params = 'dbname=gm2_online_prod user=gm2_reader host=localhost port=5433'
         elif db == 'offline':
-            params = 'dbname=gm2_online_prod user=gm2_reader password=XXX host=ifdbprod.fnal.gov port=5452'
+            params = 'dbname=gm2_online_prod user=gm2_reader password=gm2_4_reader host=ifdbprod.fnal.gov port=5452'
         else:
             print 'Unknown database:', db
         self.conn = psycopg2.connect(params)
+
+        self.calib = calib
+        if (self.calib):
+            sql = 'SELECT subchannel, calib_value  FROM g2sc_calib_temp WHERE "isValid"=true ; '
+            cur = self.conn.cursor()
+            cur.execute(sql)
+
+            while True:
+                entry = cur.fetchone()
+                if not entry: 
+                    break
+                subchannel = entry[0]
+                value = entry[1]
+                index = int(subchannel.split('_')[-1])
+                channel = subchannel[:-2]
+                self.calib_dict[ (channel, index) ] = value
 
     def execute_query(self, sql):
         cur = self.conn.cursor()
@@ -183,6 +202,12 @@ class SCDButil:
     def get_graph(self, channel, index, checkGood=True, time_interval='all', scale_overflow=True):
         cur = self.execute_query(self.generate_sql_channel(channel=channel, checkGood=checkGood, time_interval=time_interval))
 
+        cal = 0.0
+        if self.calib:
+            if (channel, index) in self.calib_dict.keys():
+                cal = self.calib_dict[ (channel, index) ]
+            print 'found calibration:', channel, index, cal
+
         gr = ROOT.TGraph()
         i = 0
         while True:
@@ -195,7 +220,8 @@ class SCDButil:
                 value = 25.
             elif value > 50.:
                 value = 25.
-            gr.SetPoint(i, time.mktime(entry[3].timetuple()), value)
+
+            gr.SetPoint(i, time.mktime(entry[3].timetuple()), value-cal)
             i += 1
 
         return gr
@@ -319,7 +345,7 @@ class SCDButil:
 
 
 if __name__ == '__main__':
-    db = SCDButil()
+    db = SCDButil(calib=True)
 
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
