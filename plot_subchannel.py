@@ -13,9 +13,13 @@ import ROOT
 
 gr = ROOT.TGraph()
 
+do_calib = False
+calib = {}
+
 
 def get_connection():
-    return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader host=localhost port=5433")
+    return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader password=gm2_4_reader host=ifdbprod.fnal.gov port=5452")
+    #return psycopg2.connect("dbname=gm2_online_prod user=gm2_reader host=localhost port=5433")
 
 
 def plot_subchannel(channel='test_channel', index=0, time_interval='all'):
@@ -99,6 +103,27 @@ def plot_subchannel(channel='test_channel', index=0, time_interval='all'):
     gr.SetTitle(title)
 
     return 
+
+if do_calib:
+    # get the connection, do the query
+    conn = get_connection()
+    sql = 'SELECT subchannel, calib_value  FROM g2sc_calib_temp; '
+    cur = conn.cursor()
+    cur.execute(sql)
+
+    while True:
+        entry = cur.fetchone()
+        if not entry: 
+            break
+        #print entry
+        subchannel = entry[0]
+        value = entry[1]
+        index = int(subchannel.split('_')[-1])
+        channel = subchannel[:-2]
+        #print channel, index
+        calib[ (channel, index) ] = value
+
+
 
 
 if __name__ == '__main__':
