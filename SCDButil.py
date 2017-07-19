@@ -255,11 +255,12 @@ class SCDButil:
                         value = 25.
 
             if channel.find('Temp') != -1:
-                if (channel, index) in self.calib_dict.keys():
-                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), value-self.calib_dict[ (channel, index) ])
+                if self.calib and ( (channel, index) in self.calib_dict.keys()):
+                    gr.SetPoint(i, time.mktime(entry[3].timetuple()), value+self.calib_dict[ (channel, index) ])
+                    #print 'apply calibration:', channel, index, value, self.calib_dict[ (channel, index) ],  value-self.calib_dict[ (channel, index) ]
                 else:
                     gr.SetPoint(i, time.mktime(entry[3].timetuple()), value)
-            elif channel.find('ADC') != -1:
+            elif self.calib and (channel.find('ADC') != -1):
                 if (channel, index) in self.calib_dict.keys():    
                     gr.SetPoint(i, time.mktime(entry[3].timetuple()), self.calib_dict[ (channel, index) ][0]*value+self.calib_dict[ (channel, index) ][1])
                 else:
