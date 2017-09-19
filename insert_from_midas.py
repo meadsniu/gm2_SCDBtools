@@ -13,7 +13,7 @@ import psycopg2
 import sys
 
 debug = False
-write_to_db = False
+write_to_db = True
 
 conn = ''
 if write_to_db:
@@ -22,7 +22,7 @@ if write_to_db:
 mscb_list = []
 last_timestamp = {}
 
-filename = 'midas_files/run00593.mid.txt'
+filename = 'midas_files/run00533.mid.txt'
 
 m = SCMIDASutil.SCMIDASutil(filename)
 
@@ -93,7 +93,7 @@ while True:
 
     for bank in b:
         # generate the channel name
-        if mscb == 'mscb323' and bank.bankName == 'MSCI':
+        if mscb == 'mscb323' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb323_ADC_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -164,7 +164,7 @@ while True:
                 conn.commit()
                 cur.close()
             
-        elif mscb == 'mscb13e' and bank.bankName == 'MSCI':
+        elif mscb == 'mscb13e' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb13e_ADC_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -249,7 +249,7 @@ while True:
                 conn.commit()
                 cur.close()
 
-        elif mscb == 'mscb319' and bank.bankName == 'MSCI':
+        elif mscb == 'mscb319' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb319_PT1000_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -320,7 +320,10 @@ while True:
                 conn.commit()
                 cur.close()
 
-        elif mscb == 'mscb174' and bank.bankName == 'MSCI':
+        elif mscb == 'mscb174' and bank.bankName == 'NEW1':
+            continue
+
+        elif mscb == 'mscb174' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb174_ADC_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -377,7 +380,7 @@ while True:
                 conn.commit()
                 cur.close()
             
-        elif mscb == 'mscb110' and bank.bankName == 'MSCI':
+        elif mscb == 'mscb110' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb110_ADC_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -406,7 +409,7 @@ while True:
                 conn.commit()
                 cur.close()
             
-        elif mscb == 'mscb282' and bank.bankName == 'MSCI':
+        elif mscb == 'mscb282' and bank.bankName in ['MSCI', 'INPT']:
             channel = 'mscb282_ADC_P0'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -477,7 +480,7 @@ while True:
                 conn.commit()
                 cur.close()
 
-        elif mscb == 'mscb282' and bank.bankName == 'MSCO':
+        elif mscb == 'mscb282' and bank.bankName in ['MSCO', 'OUTP']:
             channel = 'mscb282_Dout_P5'
             sql = sql_base + "'" + channel + "', '{"
             v = bank.bank[1].split()
@@ -506,9 +509,14 @@ while True:
                 conn.commit()
                 cur.close()
 
+        else:
+            print '*** Unknown mscb and bank name!!! ***'
+            print '      ', mscb, bank.bankName
+            sys.exit()
+
             
     #raw_input()
             
 
-print '** processed', i, 'events'
+print '** processed', i, 'events from run', runNum
 print '   found mscbs', mscb_list
