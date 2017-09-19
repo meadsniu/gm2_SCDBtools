@@ -15,7 +15,7 @@ import ROOT
 db = SCDButil.SCDButil()
 
 # create list of plots to make
-plot_list = ['hall', 'laser_hut', 'computer_room', 'magnetA', 'magnetB', 'magnetC', 'magnetD', 'magnetE', 'magnetF', 'magnetG', 'magnetH', 'magnetI']
+plot_list = ['hall', 'laser_hut', 'computer_room', 'magnetA', 'magnetB', 'magnetC', 'magnetD', 'magnetE', 'magnetF', 'magnetG', 'magnetH', 'magnetI', 'magnetJ', 'magnetK', 'magnetL']
 #plot_list = ['magnetA', 'magnetB']
 
 # which time interval plots to make
