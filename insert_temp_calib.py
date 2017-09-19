@@ -15,23 +15,28 @@ write_to_db = True
 # create the connection to the database
 conn = psycopg2.connect("dbname=gm2_online_prod user=gm2_writer host=localhost port=5433")
 
-infile = open('SubchannelCailbrationBreakdown_7-11_Fitted.csv')
+infile = open('CalibrationReferenceData-AirDiff.csv')
+
+version = '2'
 
 for line in infile:
     if line.split(',')[1] == 'test_channel': continue
-    #print "* line:",
-    #print line
+    print "* line:",
+    print line
     splitline = line.rstrip().split(',')
-    #print 'splitline:', splitline
-    if splitline[0] == 'Subchannel' or len(splitline[1]) == 0: continue
+    #splitline = line.split(',')
+    print 'splitline:', splitline
+    if splitline[0] == 'subchannel' or len(splitline[1]) == 0: continue
     subchannel = splitline[0]
     value = splitline[1]
 
+    print subchannel, value
 
-    sql = 'INSERT INTO g2sc_calib_temp (subchannel, calib_value) '
+    sql = 'INSERT INTO g2sc_calib_temp (subchannel, calib_value, version) '
     sql += "VALUES ("
     sql += "'" + subchannel + "', "
     sql += value + " "
+    sql += ", " + version + " " 
     sql += ");"
 
     print sql
