@@ -18,15 +18,18 @@ show_events = True
 pause = False
 
 input_filenames = []
-input_filenames.append('midas_files/run00578.mid.txt')
+input_filenames.append('midas_files/run00530.mid.txt')
 
 bank_list = []
 eventID_list = []
 mscb_list = []
 mscb_dict = {'006e':'mscb110', '00ae':'mscb174', '013e':'mscb13e', '013f':'mscb319', '0143':'mscb323', '011a':'mscb282' }
+bank_dict = {}
 
 min_timestamp = -1
 max_timestamp = -1
+
+runNum = -1
 
 for filename in input_filenames:
     m = SCMIDASutil.SCMIDASutil(filename)
@@ -67,13 +70,25 @@ for filename in input_filenames:
                 if bank.timestamp > max_timestamp:
                     max_timestamp = bank.timestamp
                 
+                mscb = mscb_dict[bank.eventID]
+                if mscb not in mscb_list:
+                    mscb_list.append(mscb)
+                    bank_dict[mscb] = []
+
+                if bank.bankName not in bank_dict[mscb]:
+                    bank_dict[mscb].append(bank.bankName)
 
         if pause:
             x = raw_input()
 
     print
-    print '** found', i, 'events'
+    print '** found', i, 'events from run', runNum
     print '   banks:', bank_list
     print '   eventIDs:', eventID_list
     print '   start time:', datetime.datetime.fromtimestamp(int(min_timestamp, 16)).isoformat()
     print '   end time:', datetime.datetime.fromtimestamp(int(max_timestamp, 16)).isoformat()
+    print
+    print '   found mscbs:', mscb_list
+    print '   found banks:'
+    for mscb in bank_dict:
+        print '      ', mscb, 'banks', bank_dict[mscb]
