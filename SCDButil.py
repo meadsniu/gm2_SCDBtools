@@ -55,10 +55,18 @@ class SCDButil:
                    ('mscb323_Temp_P3', 1):ROOT.kViolet+1,
                    ('mscb323_Temp_P3', 2):ROOT.kViolet+2,
                    ('mscb13e_Temp_P3', 3):ROOT.kViolet+3,
+                   ('mscb323_Temp_P3', 4):ROOT.kViolet, 
+                   ('mscb323_Temp_P3', 5):ROOT.kViolet+1,
+                   ('mscb323_Temp_P3', 6):ROOT.kViolet+2,
+                   ('mscb13e_Temp_P3', 7):ROOT.kViolet+3,
                    ('mscb13e_Temp_P3', 0):ROOT.kMagenta, 
                    ('mscb13e_Temp_P3', 1):ROOT.kMagenta+1,
                    ('mscb13e_Temp_P3', 2):ROOT.kMagenta+2,
                    ('mscb13e_Temp_P3', 3):ROOT.kMagenta+3,
+                   ('mscb13e_Temp_P4', 1):ROOT.kMagenta, 
+                   ('mscb13e_Temp_P4', 2):ROOT.kMagenta+1,
+                   ('mscb13e_Temp_P4', 3):ROOT.kMagenta+2,
+                   ('mscb13e_Temp_P4', 4):ROOT.kMagenta+3,
                    ('mscb174_Temp_P1', 4):ROOT.kSpring-4,
                    ('mscb174_Temp_P1', 5):ROOT.kSpring-3,
                    ('mscb174_Temp_P1', 6):ROOT.kSpring-2,
@@ -98,11 +106,13 @@ class SCDButil:
     subchannel_dict['magnetC'] = [ ('mscb323_Temp_P1', 4), ('mscb323_Temp_P1', 5), ('mscb323_Temp_P1', 6), ('mscb323_Temp_P1', 7) ]
     subchannel_dict['magnetD'] = [ ('mscb13e_Temp_P1', 4), ('mscb13e_Temp_P1', 5), ('mscb13e_Temp_P1', 6), ('mscb13e_Temp_P1', 7) ]
     subchannel_dict['magnetE'] = [ ('mscb323_Temp_P2', 0), ('mscb323_Temp_P2', 1), ('mscb323_Temp_P2', 2), ('mscb323_Temp_P2', 3) ]
-    subchannel_dict['magnetF'] = [ ('mscb13e_Temp_P2', 0), ('mscb13e_Temp_P2', 1), ('mscb13e_Temp_P2', 2), ('mscb13e_Temp_P2', 3) ]
+    subchannel_dict['magnetF'] = [ ('mscb13e_Temp_P4', 6), ('mscb13e_Temp_P2', 1), ('mscb13e_Temp_P2', 0), ('mscb13e_Temp_P2', 3) ]
     subchannel_dict['magnetG'] = [ ('mscb323_Temp_P2', 4), ('mscb323_Temp_P2', 5), ('mscb323_Temp_P2', 6), ('mscb323_Temp_P2', 7) ]
     subchannel_dict['magnetH'] = [ ('mscb13e_Temp_P2', 4), ('mscb13e_Temp_P2', 5), ('mscb13e_Temp_P2', 6), ('mscb13e_Temp_P2', 7) ]
     subchannel_dict['magnetI'] = [ ('mscb323_Temp_P3', 0), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 2), ('mscb323_Temp_P3', 3) ]
-    subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 0), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
+    subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 7), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
+    subchannel_dict['magnetK'] = [ ('mscb323_Temp_P3', 4), ('mscb323_Temp_P3', 5), ('mscb323_Temp_P3', 6), ('mscb323_Temp_P3', 7) ]
+    subchannel_dict['magnetL'] = [ ('mscb13e_Temp_P4', 1), ('mscb13e_Temp_P4', 2), ('mscb13e_Temp_P4', 3), ('mscb13e_Temp_P4', 4) ]
     subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1) ]
     subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0) ]
 
@@ -169,6 +179,8 @@ class SCDButil:
            interval = " now() - interval '1 month' "
        elif time_interval == 'all':
            interval = " now() - interval '10 years' "
+       elif time_interval == 'commissioning_run':
+           interval = " date('2017-05-31') AND time < date('2017-07-08') "
 
        sql = "SELECT * from g2sc_values "
        sql += "WHERE channel='" + channel + "' "
@@ -329,8 +341,10 @@ class SCDButil:
             gr.SetName(self.get_label(channel=entry[0], index=entry[1]))
             if (entry[0], entry[1]) in self.color_dict.keys():
                 gr.SetMarkerColor(self.color_dict[ (entry[0], entry[1]) ])
+                gr.SetLineColor(self.color_dict[ (entry[0], entry[1]) ] )
             else:
                 gr.SetMarkerColor(ROOT.kBlack)
+                gr.SetLineColor(ROOT.kBlack)
             graphs.append(gr)
 
         #canvas = ROOT.TCanvas()
@@ -405,7 +419,7 @@ if __name__ == '__main__':
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
     canvas = ROOT.TCanvas('c1', 'c1', 1)
-    g = db.plot_channels(db.subchannel_dict['hall'])
+    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='day')
     g.Draw('ap')
 
     #ROOT.gApplication.Run()
