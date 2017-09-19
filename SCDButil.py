@@ -169,6 +169,8 @@ class SCDButil:
            interval = " now() - interval '1 month' "
        elif time_interval == 'all':
            interval = " now() - interval '10 years' "
+       elif time_interval == 'commissioning_run':
+           interval = " date('2017-05-31') AND time < date('2017-07-08') "
 
        sql = "SELECT * from g2sc_values "
        sql += "WHERE channel='" + channel + "' "
@@ -329,8 +331,10 @@ class SCDButil:
             gr.SetName(self.get_label(channel=entry[0], index=entry[1]))
             if (entry[0], entry[1]) in self.color_dict.keys():
                 gr.SetMarkerColor(self.color_dict[ (entry[0], entry[1]) ])
+                gr.SetLineColor(self.color_dict[ (entry[0], entry[1]) ] )
             else:
                 gr.SetMarkerColor(ROOT.kBlack)
+                gr.SetLineColor(ROOT.kBlack)
             graphs.append(gr)
 
         #canvas = ROOT.TCanvas()
@@ -405,7 +409,7 @@ if __name__ == '__main__':
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
     canvas = ROOT.TCanvas('c1', 'c1', 1)
-    g = db.plot_channels(db.subchannel_dict['hall'])
+    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='day')
     g.Draw('ap')
 
     #ROOT.gApplication.Run()
