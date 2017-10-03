@@ -94,6 +94,18 @@ class SCDButil:
                    ('mscb13e_ADC_P0', 0):ROOT.kBlue,
                    ('mscb174_ADC_P0', 5):ROOT.kBlue+1,
                    ('mscb110_ADC_P0', 0):ROOT.kBlue+2,
+                   ('mscb282_DAC_P6', 0):ROOT.kBlue-10,
+                   ('mscb282_DAC_P6', 1):ROOT.kBlue,
+                   ('mscb282_DAC_P6', 2):ROOT.kBlue+4,
+                   ('mscb282_Temp_P2', 3):ROOT.kRed-10,
+                   ('mscb282_Temp_P2', 4):ROOT.kRed,
+                   ('mscb282_Temp_P2', 5):ROOT.kRed+4,
+                   ('mscb282_Din_P4', 0):ROOT.kGray,
+                   ('mscb282_Din_P4', 1):ROOT.kGray+1,
+                   ('mscb282_Din_P4', 2):ROOT.kGray+2,
+                   ('mscb282_Din_P4', 3):ROOT.kOrange-4,
+                   ('mscb282_Din_P4', 4):ROOT.kOrange,
+                   ('mscb282_Din_P4', 5):ROOT.kOrange+7
                  }
 
     # dictionary to hold the list of subchannels for specific plots
@@ -115,6 +127,9 @@ class SCDButil:
     subchannel_dict['magnetL'] = [ ('mscb13e_Temp_P4', 1), ('mscb13e_Temp_P4', 2), ('mscb13e_Temp_P4', 3), ('mscb13e_Temp_P4', 4) ]
     subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1) ]
     subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0) ]
+    subchannel_dict['kickersetv'] = [('mscb282_DAC_P6', 0), ('mscb282_DAC_P6', 1), ('mscb282_DAC_P6', 2) ]
+    subchannel_dict['kickertemp'] = [('mscb282_Temp_P2', 3), ('mscb282_Temp_P2', 4), ('mscb282_Temp_P2', 5) ]
+    subchannel_dict['kickeroil'] = [('mscb282_Din_P4', 0), ('mscb282_Din_P4', 1), ('mscb282_Din_P4', 2), ('mscb282_Din_P4', 3), ('mscb282_Din_P4', 4), ('mscb282_Din_P4', 5)]
 
     # calibration dictionary to hold the calibration values
     calib_dict = {}
@@ -345,6 +360,8 @@ class SCDButil:
             else:
                 gr.SetMarkerColor(ROOT.kBlack)
                 gr.SetLineColor(ROOT.kBlack)
+            if 'mscb282_DAC_P6' in entry[0]:
+                gr.SetMarkerStyle(6)
             graphs.append(gr)
 
         #canvas = ROOT.TCanvas()
