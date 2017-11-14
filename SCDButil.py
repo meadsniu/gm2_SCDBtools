@@ -350,6 +350,8 @@ class SCDButil:
         yaxis_title = 'value'
         if channel.find('Temp') != -1:
             yaxis_title = 'Temperature (#circ C)'
+        elif channel.find('PT1000') != -1:
+            yaxis_title = 'Temperature (#circ C)'
         elif channel.find('ADC') != -1:
             yaxis_title = 'ADC value (Volts)'
         gr.GetYaxis().SetTitle(yaxis_title)
@@ -425,6 +427,11 @@ class SCDButil:
                 yaxis_title = 'Temp(raw) (#circ C)'
             else:
                 yaxis_title = 'Temp(calib) (#circ C)'
+        elif subchannel_list[0][0].find('PT1000') != -1:
+            if self.calib == False:
+                yaxis_title = 'Temp(raw) (#circ C)'
+            else:
+                yaxis_title = 'Temp(raw) (#circ C)'
         elif subchannel_list[0][0].find('ADC') != -1:
             if self.calib == False:
                 yaxis_title = 'ADC value (Volts)'
