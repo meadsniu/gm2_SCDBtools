@@ -105,10 +105,22 @@ class SCDButil:
                    ('mscb282_Din_P4', 2):ROOT.kGray+2,
                    ('mscb282_Din_P4', 3):ROOT.kOrange-4,
                    ('mscb282_Din_P4', 4):ROOT.kOrange,
-                   ('mscb282_Din_P4', 5):ROOT.kOrange+7
+                   ('mscb282_Din_P4', 5):ROOT.kOrange+7,
+                   ('mscb319_PT1000_P0', 0): ROOT.kOrange-9,
+                   ('mscb319_PT1000_P0', 1): ROOT.kOrange-8,
+                   ('mscb319_PT1000_P1', 0): ROOT.kOrange-7,
+                   ('mscb319_PT1000_P1', 1): ROOT.kOrange-6,
+                   ('mscb319_PT1000_P2', 0): ROOT.kOrange-5,
+                   ('mscb319_PT1000_P2', 1): ROOT.kOrange-4,
+                   ('mscb319_PT1000_P3', 0): ROOT.kOrange-3,
+                   ('mscb319_PT1000_P3', 1): ROOT.kOrange-2,
+                   ('mscb319_PT1000_P4', 0): ROOT.kOrange-1,
+                   ('mscb319_PT1000_P4', 1): ROOT.kOrange,
+                   ('mscb319_PT1000_P5', 0): ROOT.kOrange+1,
+                   ('mscb319_PT1000_P5', 1): ROOT.kOrange+2
                  }
 
-    # dictionary to hold the list of subchannels for specific plots
+    # Dictionary to hold the list of subchannels for specific plots
     subchannel_dict = {}
     subchannel_dict['hall'] = [ ('mscb174_Temp_P1', 4), ('mscb174_Temp_P1', 5), ('mscb174_Temp_P1', 6), ('mscb174_Temp_P1', 7), ('mscb174_Temp_P5', 0), ('mscb174_Temp_P5', 1), ('mscb174_Temp_P5', 2), ('mscb174_Temp_P5', 3), ('mscb174_Temp_P5', 4), ('mscb174_Temp_P5', 5), ('mscb174_Temp_P5', 6), ('mscb174_Temp_P5', 7)]
     subchannel_dict['laser_hut'] = [ ('mscb174_Temp_P7', 0), ('mscb174_Temp_P7', 1) ]
@@ -130,6 +142,7 @@ class SCDButil:
     subchannel_dict['kickersetv'] = [('mscb282_DAC_P6', 0), ('mscb282_DAC_P6', 1), ('mscb282_DAC_P6', 2) ]
     subchannel_dict['kickertemp'] = [('mscb282_Temp_P2', 3), ('mscb282_Temp_P2', 4), ('mscb282_Temp_P2', 5) ]
     subchannel_dict['kickeroil'] = [('mscb282_Din_P4', 0), ('mscb282_Din_P4', 1), ('mscb282_Din_P4', 2), ('mscb282_Din_P4', 3), ('mscb282_Din_P4', 4), ('mscb282_Din_P4', 5)]
+    subchannel_dict['vacchamber'] = [('mscb319_PT1000_P0', 0), ('mscb319_PT1000_P0', 1), ('mscb319_PT1000_P1', 0), ('mscb319_PT1000_P1', 1), ('mscb319_PT1000_P2', 0), ('mscb319_PT1000_P2', 1), ('mscb319_PT1000_P3', 0), ('mscb319_PT1000_P3', 1), ('mscb319_PT1000_P4', 0), ('mscb319_PT1000_P4', 1), ('mscb319_PT1000_P5', 0), ('mscb319_PT1000_P5', 1) ]
 
     # calibration dictionary to hold the calibration values
     calib_dict = {}
