@@ -122,7 +122,7 @@ class SCDButil:
 
     # Dictionary to hold the list of subchannels for specific plots
     subchannel_dict = {}
-    subchannel_dict['hall'] = [ ('mscb174_Temp_P1', 4), ('mscb174_Temp_P1', 5), ('mscb174_Temp_P1', 6), ('mscb174_Temp_P1', 7), ('mscb174_Temp_P5', 0), ('mscb174_Temp_P5', 1), ('mscb174_Temp_P5', 2), ('mscb174_Temp_P5', 3), ('mscb174_Temp_P5', 4), ('mscb174_Temp_P5', 5), ('mscb174_Temp_P5', 6), ('mscb174_Temp_P5', 7)]
+    subchannel_dict['hall'] = [ ('mscb174_Temp_P1', 4), ('mscb174_Temp_P1', 5), ('mscb174_Temp_P1', 6), ('mscb174_Temp_P1', 7), ('mscb174_Temp_P5', 0), ('mscb174_Temp_P5', 1), ('mscb174_Temp_P5', 2), ('mscb174_Temp_P5', 3), ('mscb174_Temp_P5', 4), ('mscb174_Temp_P5', 5), ('mscb174_Temp_P5', 6), ('mscb174_Temp_P5', 7), ('acnet_weather_gtemp', 0)]
     subchannel_dict['laser_hut'] = [ ('mscb174_Temp_P7', 0), ('mscb174_Temp_P7', 1) ]
     subchannel_dict['computer_room'] = [ ('mscb110_Temp_P1', 0), ('mscb110_Temp_P1', 1), ('mscb110_Temp_P1', 2), ('mscb110_Temp_P1', 3), ('mscb110_Temp_P1', 4), ('mscb110_Temp_P1', 5), ('mscb110_Temp_P1', 6) ]
     subchannel_dict['magnetA'] = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1), ('mscb323_Temp_P1', 2), ('mscb323_Temp_P1', 3) ]
@@ -137,12 +137,15 @@ class SCDButil:
     subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 7), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
     subchannel_dict['magnetK'] = [ ('mscb323_Temp_P3', 4), ('mscb323_Temp_P3', 5), ('mscb323_Temp_P3', 6), ('mscb323_Temp_P3', 7) ]
     subchannel_dict['magnetL'] = [ ('mscb13e_Temp_P4', 1), ('mscb13e_Temp_P4', 2), ('mscb13e_Temp_P3', 5), ('mscb13e_Temp_P4', 4) ]
-    subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1) ]
-    subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0) ]
+    subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1), ('acnet_weather_ghumid', 0) ]
+    subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0), ('acnet_weather_gbpress', 0) ]
     subchannel_dict['kickersetv'] = [('mscb282_DAC_P6', 0), ('mscb282_DAC_P6', 1), ('mscb282_DAC_P6', 2) ]
     subchannel_dict['kickertemp'] = [('mscb282_Temp_P2', 3), ('mscb282_Temp_P2', 4), ('mscb282_Temp_P2', 5) ]
     subchannel_dict['kickeroil'] = [('mscb282_Din_P4', 0), ('mscb282_Din_P4', 1), ('mscb282_Din_P4', 2), ('mscb282_Din_P4', 3), ('mscb282_Din_P4', 4), ('mscb282_Din_P4', 5)]
     subchannel_dict['vacchamber'] = [('mscb319_PT1000_P0', 0), ('mscb319_PT1000_P0', 1), ('mscb319_PT1000_P1', 0), ('mscb319_PT1000_P1', 1), ('mscb319_PT1000_P2', 0), ('mscb319_PT1000_P2', 1), ('mscb319_PT1000_P3', 0), ('mscb319_PT1000_P3', 1), ('mscb319_PT1000_P4', 0), ('mscb319_PT1000_P4', 1), ('mscb319_PT1000_P5', 0), ('mscb319_PT1000_P5', 1) ]
+    subchannel_dict['acnet_temp'] = [('acnet_weather_gtemp', 0), ('acnet_weather_dtemp', 0)]
+    subchannel_dict['acnet_humidity'] = [('acnet_weather_ghumid', 0)]
+    subchannel_dict['acnet_pressure'] = [('acnet_weather_gbpress', 0)]
 
     # calibration dictionary to hold the calibration values
     calib_dict = {}
@@ -287,6 +290,9 @@ class SCDButil:
                 if channel.find('ADC') != -1:
                     if (value < 0.0) or (value > 5.0):
                         value = 0.0;
+                # don't make any changes to ACNET channels
+                elif channel.find('acnet') != -1:
+                    pass
                 # for temp channels, set to 25
                 else:
                     if value < -10.:
