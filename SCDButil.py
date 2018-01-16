@@ -136,7 +136,7 @@ class SCDButil:
     subchannel_dict['magnetI'] = [ ('mscb323_Temp_P3', 0), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 2), ('mscb323_Temp_P4', 3) ]
     subchannel_dict['magnetJ'] = [ ('mscb13e_Temp_P3', 7), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P3', 2), ('mscb13e_Temp_P3', 3) ]
     subchannel_dict['magnetK'] = [ ('mscb323_Temp_P3', 4), ('mscb323_Temp_P3', 5), ('mscb323_Temp_P3', 6), ('mscb323_Temp_P3', 7) ]
-    subchannel_dict['magnetL'] = [ ('mscb13e_Temp_P4', 1), ('mscb13e_Temp_P4', 2), ('mscb13e_Temp_P4', 3), ('mscb13e_Temp_P3', 5) ]
+    subchannel_dict['magnetL'] = [ ('mscb13e_Temp_P4', 1), ('mscb13e_Temp_P4', 2), ('mscb13e_Temp_P3', 5), ('mscb13e_Temp_P4', 4) ]
     subchannel_dict['humidity'] = [ ('mscb13e_ADC_P0', 2), ('mscb174_ADC_P0', 7), ('mscb110_ADC_P0', 1) ]
     subchannel_dict['pressure'] = [ ('mscb13e_ADC_P0', 0), ('mscb174_ADC_P0', 5), ('mscb110_ADC_P0', 0) ]
     subchannel_dict['kickersetv'] = [('mscb282_DAC_P6', 0), ('mscb282_DAC_P6', 1), ('mscb282_DAC_P6', 2) ]
