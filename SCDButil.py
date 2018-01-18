@@ -161,7 +161,10 @@ class SCDButil:
         if db == 'online':
             params = 'dbname=gm2_online_prod user=gm2_reader host=localhost port=5433'
         elif db == 'offline':
-            params = 'dbname=gm2_online_prod user=gm2_reader password=XXX host=ifdbprod.fnal.gov port=5452'
+            # if connecting from a Fermilab IP, you don't need a password
+            params = 'dbname=gm2_online_prod user=gm2_reader  host=ifdbprod.fnal.gov port=5452'
+            # connecting from offsite requires a password, add it here
+            #params = 'dbname=gm2_online_prod user=gm2_reader password=XXX host=ifdbprod.fnal.gov port=5452'
         else:
             print 'Unknown database:', db
         self.conn = psycopg2.connect(params)
@@ -198,6 +201,10 @@ class SCDButil:
                 index = int(subchannel.split('_')[-1])
                 channel = subchannel[:-2]
                 self.calib_dict[ (channel, index) ] = (slope, intercept)
+
+    def __del__(self):
+        # close the database connection
+        self.conn.close()
 
     def execute_query(self, sql):
         cur = self.conn.cursor()
