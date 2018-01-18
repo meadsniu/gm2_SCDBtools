@@ -8,9 +8,10 @@ M. Eads
 June 2017
 """
 
-import sys, time
+import sys, time, datetime
 import psycopg2
 import ROOT
+import RunDButil
 
 class SCDButil:
     """
@@ -224,11 +225,25 @@ class SCDButil:
            interval = " now() - interval '10 years' "
        elif time_interval == 'commissioning_run':
            interval = " date('2017-05-31') AND time < date('2017-07-08') "
+       elif time_interval.startswith('runrange'):
+           rundb = RunDButil.RunDButil()
+           startrun = time_interval.split('-')[0][8:]
+           stoprun = time_interval.split('-')[1]
+           start = rundb.get_starttime(startrun)
+           stop = rundb.get_stoptime(stoprun)
+           interval = "'" + start.isoformat() + "'"' AND time < ' + "'" + stop.isoformat() + "' "
+       elif time_interval.startswith('run'):
+           rundb = RunDButil.RunDButil()
+           run = time_interval[3:]
+           start = rundb.get_starttime(run)
+           stop = rundb.get_stoptime(run)
+           interval = "'" + start.isoformat() + "'"' AND time < ' + "'" + stop.isoformat() + "' "
 
        sql = "SELECT * from g2sc_values "
        sql += "WHERE channel='" + channel + "' "
        sql += 'AND "isGood"=true  '
        sql += 'AND time > ' + interval 
+       
 
        if checkGood:
            sql += ' AND "isGood"=True '
@@ -238,6 +253,7 @@ class SCDButil:
 
        sql += ' ; '
         
+       #print sql
        return sql
 
     def get_channel_data(self, channel, checkGood=True, time_interval='all', limit=-1):
@@ -474,7 +490,7 @@ if __name__ == '__main__':
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
     canvas = ROOT.TCanvas('c1', 'c1', 1)
-    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='day')
+    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='runrange8875-8876')
     g.Draw('ap')
 
     #ROOT.gApplication.Run()
