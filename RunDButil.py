@@ -8,7 +8,7 @@ M. Eads
 Jan 2018
 """
 
-import sys, time
+import sys, time, datetime
 import psycopg2
 
 class RunDButil:
@@ -62,7 +62,7 @@ class RunDButil:
             return
         elif len(result) == 1:
             # only one result for this run, which is expected
-            return result[0]
+            return result[0][0]
 
     def get_starttime(self, run):
         # method to return the run start time
