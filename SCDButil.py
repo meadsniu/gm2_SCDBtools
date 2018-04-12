@@ -153,6 +153,8 @@ class SCDButil:
     subchannel_dict['acnet_humidity'] = [('acnet_weather_ghumid', 0)]
     subchannel_dict['acnet_pressure'] = [('acnet_weather_gbpress', 0)]
 
+    subchannel_dict['magnetback'] = [('mscb323_Temp_P1', 1), ('mscb323_Temp_P1', 5), ('mscb323_Temp_P2', 1), ('mscb323_Temp_P2', 5), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 5), ('mscb13e_Temp_P1', 1), ('mscb13e_Temp_P1', 5), ('mscb13e_Temp_P2', 1), ('mscb13e_Temp_P2', 5), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P4', 2) ]
+
     # calibration dictionary to hold the calibration values
     calib_dict = {}
 
@@ -490,7 +492,7 @@ if __name__ == '__main__':
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
     canvas = ROOT.TCanvas('c1', 'c1', 1)
-    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='runrange8875-8876')
+    g = db.plot_channels(db.subchannel_dict['magnetback'], time_interval='all')
     g.Draw('ap')
 
     #ROOT.gApplication.Run()
