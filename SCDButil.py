@@ -240,6 +240,18 @@ class SCDButil:
            start = rundb.get_starttime(run)
            stop = rundb.get_stoptime(run)
            interval = "'" + start.isoformat() + "'"' AND time < ' + "'" + stop.isoformat() + "' "
+       elif time_interval.startswith('from') and (time_interval.find('to') != -1):
+           start = time_interval.split()[1]
+           stop = time_interval.split()[3]
+           interval = "'" + start + "'"' AND time < ' + "'" + stop + "' "
+       elif time_interval.startswith('interval'):
+           # input is the raw SQL statement, strip off the 'interval' part and pass it along
+           interval = time_interval[8:]
+       elif time_interval.startswith('60hr'):
+           interval = " '2018-04-22 01:09:50' and time < '2018-04-25 02:20:00' "
+       else:
+           print 'Unknown time interval:', time_interval
+           sys.exit()
 
        sql = "SELECT * from g2sc_values "
        sql += "WHERE channel='" + channel + "' "
