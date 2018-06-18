@@ -153,6 +153,8 @@ class SCDButil:
     subchannel_dict['acnet_humidity'] = [('acnet_weather_ghumid', 0)]
     subchannel_dict['acnet_pressure'] = [('acnet_weather_gbpress', 0)]
 
+    subchannel_dict['magnetback'] = [('mscb323_Temp_P1', 1), ('mscb323_Temp_P1', 5), ('mscb323_Temp_P2', 1), ('mscb323_Temp_P2', 5), ('mscb323_Temp_P3', 1), ('mscb323_Temp_P3', 5), ('mscb13e_Temp_P1', 1), ('mscb13e_Temp_P1', 5), ('mscb13e_Temp_P2', 1), ('mscb13e_Temp_P2', 5), ('mscb13e_Temp_P3', 1), ('mscb13e_Temp_P4', 2) ]
+
     # calibration dictionary to hold the calibration values
     calib_dict = {}
 
@@ -238,6 +240,18 @@ class SCDButil:
            start = rundb.get_starttime(run)
            stop = rundb.get_stoptime(run)
            interval = "'" + start.isoformat() + "'"' AND time < ' + "'" + stop.isoformat() + "' "
+       elif time_interval.startswith('from') and (time_interval.find('to') != -1):
+           start = time_interval.split()[1]
+           stop = time_interval.split()[3]
+           interval = "'" + start + "'"' AND time < ' + "'" + stop + "' "
+       elif time_interval.startswith('interval'):
+           # input is the raw SQL statement, strip off the 'interval' part and pass it along
+           interval = time_interval[8:]
+       elif time_interval.startswith('60hr'):
+           interval = " '2018-04-22 01:09:50' and time < '2018-04-25 02:20:00' "
+       else:
+           print 'Unknown time interval:', time_interval
+           sys.exit()
 
        sql = "SELECT * from g2sc_values "
        sql += "WHERE channel='" + channel + "' "
@@ -490,7 +504,7 @@ if __name__ == '__main__':
     subchannel_list = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1) ]
 
     canvas = ROOT.TCanvas('c1', 'c1', 1)
-    g = db.plot_channels(db.subchannel_dict['hall'], time_interval='runrange8875-8876')
+    g = db.plot_channels(db.subchannel_dict['magnetback'], time_interval='all')
     g.Draw('ap')
 
     #ROOT.gApplication.Run()
