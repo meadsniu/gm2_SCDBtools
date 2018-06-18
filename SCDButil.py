@@ -359,28 +359,97 @@ class SCDButil:
 
         return gr
 
-    def get_average_graph(self, channel, index_list, checkGood=True, time_interval='all'):
+    def get_average_graph(self, channel, index, begTime, checkGood=True, time_interval='all', scale_overflow=True, avg_interval=600.0):
         cur = self.execute_query(self.generate_sql_channel(channel=channel, checkGood=checkGood, time_interval=time_interval))
+	
+	T_INTERVAL = avg_interval
+	gr = ROOT.TGraph()
+	temptime = []
+	i = 0
+	j = 0
+	k = 0
+	max = 0
+	tStart = 0.0
+	tEnd = 0.0
+	sum = 0.0
+	avg = 0.0
+	n = 0
+	while True:
+		entry = cur.fetchone()
+		if not entry:
+			break
+		
+		value = entry[2][index]
 
-        gr = ROOT.TGraph()
-        i = 0
-        while True:
-            entry = cur.fetchone()
-            if not entry:
-                break
+		if scale_overflow == True:
+			# for adc channels, should be between 0 and 5
+			if channel.find('ADC') != -1:
+				if (value < 0.0) or (value > 5.0):
+					value = 0.0;
+		
+			# don't make any changes to the ACNET channels
+			elif channel.find('acnet') != -1:
+				pass
+		
+			#for temp channels, set to 25
+			else:
+				if value < 15.:
+					value = -999.9
+				elif value > 50.:
+					value = -999.9
 
-            sum = 0.
-            num = 0
-            for index in index_list:
-                value = entry[2][index]
-                if value > -49. and value < 149.:
-                    sum += value
-                    num += 1
-            avg = sum/num
-            gr.SetPoint(i, time.mktime(entry[3].timetuple()), avg)
-            i += 1
+		# Now, we go through the values, and place them into 2D array temptime, to be sorted.
+		if value != -999.9:
+			if channel.find('Temp') != -1:
+				if self.calib and ( (channel, index) in self.calib_dict.keys()):
+					temptime.append([value+self.calib_dict[ (channel, index) ], time.mktime(entry[3].timetuple())])
+				else:
+					temptime.append([value,time.mktime(entry[3].timetuple())])
+			elif self.calib and (channel.find('ADC') != -1):
+				if (channel, index) in self.calib_dict.keys():
+					temptime.append([self.calib_dict[ (channel, index) ][0]*value+self.calib_dict[ (channel, index) ][1], time.mktime(entry[3].timetuple())])
+				else:
+					temptime.append([value, time.mktime(entry[3].timetuple())])
+			else:
+				temptime.append([value, time.mktime(entry[3].timetuple())])
+		
+			i += 1
+	
+	max = i
+	
+	if max == 0:
+		return gr
 
-        return gr
+	# Sort array temptime by time (row 1) ?
+	#sorted(temptime,key=operator.itemgetter(1))
+
+
+	tStart = begTime
+	tEnd = begTime + T_INTERVAL
+
+
+	# Averages the values using T_INTERVAL, and places the points into gr 
+
+	while j < max:
+		if temptime[j][1] < tStart:
+			j += 1
+		elif temptime[j][1] >= tStart and (temptime[j][1] < tEnd):
+			sum += temptime[j][0]
+			n += 1
+			j += 1
+		elif temptime[j][1] >= tEnd:
+			if n == 0:
+				tStart += T_INTERVAL
+				tEnd += T_INTERVAL
+			else:
+				avg = sum/n
+				gr.SetPoint(k, tEnd - (T_INTERVAL/2.0), avg)
+				sum = 0
+				n = 0
+				k += 1	
+
+		
+	return gr        
         
         
     def plot_channel(self, channel, index, checkGood=True, time_interval='all', scale_overflow=True):
@@ -497,6 +566,70 @@ class SCDButil:
 
         return mg
 
+    def avg_plot_channels(self, subchannel_list, begTime, checkGood=True, time_interval='all', title='', scale_overflow=True, fixed_scale=False, draw_legend=True, avg_interval=600.00):
+        graphs = []
+        mg = ROOT.TMultiGraph()
+        mg.SetTitle(title)
+        leg = ROOT.TLegend(0.85, 0.65, 0.95, 0.95)
+        for entry in subchannel_list:
+            gr = self.get_average_graph(channel=entry[0], index=entry[1], checkGood=checkGood, time_interval=time_interval, scale_overflow=scale_overflow, avg_interval=avg_interval, begTime=begTime)
+            gr.SetName(self.get_label(channel=entry[0], index=entry[1]))
+            if (entry[0], entry[1]) in self.color_dict.keys():
+                gr.SetMarkerColor(self.color_dict[ (entry[0], entry[1]) ])
+                gr.SetLineColor(self.color_dict[ (entry[0], entry[1]) ] )
+            else:
+                gr.SetMarkerColor(ROOT.kBlack)
+                gr.SetLineColor(ROOT.kBlack)
+            if 'mscb282_DAC_P6' in entry[0]:
+                gr.SetMarkerStyle(6)
+            graphs.append(gr)
+
+        #canvas = ROOT.TCanvas()
+        first = True
+        i = 0
+        for gr in graphs:
+            mg.Add(gr)
+
+            
+            leg.AddEntry(gr, 'name', 'l')
+
+        mg.Draw('ap')
+        mg.GetXaxis().SetTimeDisplay(1)
+        mg.GetXaxis().SetTimeFormat('#splitline{%b-%d}{%H:%M}')
+        mg.GetXaxis().SetLabelSize(0.025)
+        mg.GetXaxis().SetLabelOffset(0.02)
+
+        if draw_legend:
+            #print 'drawing legend...'
+            leg.Draw()
+
+        yaxis_title = 'value'
+        if subchannel_list[0][0].find('Temp') != -1:
+            if self.calib == False:
+                yaxis_title = 'Temp(raw) (#circ C)'
+            else:
+                yaxis_title = 'Temp(calib) (#circ C)'
+        elif subchannel_list[0][0].find('PT1000') != -1:
+            if self.calib == False:
+                yaxis_title = 'Temp(raw) (#circ C)'
+            else:
+                yaxis_title = 'Temp(raw) (#circ C)'
+        elif subchannel_list[0][0].find('ADC') != -1:
+            if self.calib == False:
+                yaxis_title = 'ADC value (Volts)'
+            elif subchannel_list[0] in self.subchannel_dict['humidity']:
+                yaxis_title = 'Relative Humidity (%)'
+            elif subchannel_list[0] in self.subchannel_dict['pressure']:
+                yaxis_title = 'Air Pressure (mbar)'
+            else:
+                yaxis_title = 'ADC value (Volts)'
+        mg.GetYaxis().SetTitle(yaxis_title)
+        mg.GetYaxis().SetTitleOffset(1.3)
+
+        if fixed_scale:
+            mg.GetYaxis().SetRangeUser(25., 35.)
+
+        return mg
 
 if __name__ == '__main__':
     db = SCDButil(calib=True)
