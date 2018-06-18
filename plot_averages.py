@@ -9,7 +9,26 @@ June 2017
 
 import SCDButil
 import ROOT
-time_interval = 'week'
+import time
+
+time_interval = 'month'
+avg_interval = 600.0
+i = 0
+
+if time_interval == 'hour':
+        begTime = time.time() - 3600
+elif time_interval == 'day':
+        begTime = time.time() - 86400
+elif time_interval == 'week':
+        begTime = time.time() - 604800
+elif time_interval == 'month':
+        begTime = time.time() - 2678400
+elif time_interval == 'year':
+        begTime = time.time() - 31536000
+elif time_interval == 'all':
+        begTime = time.time() - 315360000
+
+
 
 # set up a dictionary with all the channels and indices by magnet sector
 d = {}
@@ -26,17 +45,19 @@ d['H'] = ('mscb13e_Temp_P2', [4, 5, 6])
 d['J'] = ('mscb13e_Temp_P3', [0, 1, 2])
 
 # get the graphs of average temperature by sector
-db = SCDButil.SCDButil()
-gA = db.get_average_graph(d['A'][0], d['A'][1], time_interval=time_interval)
-gB = db.get_average_graph(d['B'][0], d['B'][1], time_interval=time_interval)
-gC = db.get_average_graph(d['C'][0], d['C'][1], time_interval=time_interval)
-gD = db.get_average_graph(d['D'][0], d['D'][1], time_interval=time_interval)
-gE = db.get_average_graph(d['E'][0], d['E'][1], time_interval=time_interval)
-gF = db.get_average_graph(d['F'][0], d['F'][1], time_interval=time_interval)
-gG = db.get_average_graph(d['G'][0], d['G'][1], time_interval=time_interval)
-gH = db.get_average_graph(d['H'][0], d['H'][1], time_interval=time_interval)
-gI = db.get_average_graph(d['I'][0], d['I'][1], time_interval=time_interval)
-gJ = db.get_average_graph(d['J'][0], d['J'][1], time_interval=time_interval)
+db = SCDButil.SCDButil(calib=True)
+while i < 3:
+	gA = db.get_average_graph(d['A'][0], d['A'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gB = db.get_average_graph(d['B'][0], d['B'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gC = db.get_average_graph(d['C'][0], d['C'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gD = db.get_average_graph(d['D'][0], d['D'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gE = db.get_average_graph(d['E'][0], d['E'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gF = db.get_average_graph(d['F'][0], d['F'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gG = db.get_average_graph(d['G'][0], d['G'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gH = db.get_average_graph(d['H'][0], d['H'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gI = db.get_average_graph(d['I'][0], d['I'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	gJ = db.get_average_graph(d['J'][0], d['J'][1][i], time_interval=time_interval, avg_interval=avg_interval, begTime=begTime)
+	i += 1
 
 dA = ROOT.TGraph()
 dB = ROOT.TGraph()
@@ -95,6 +116,7 @@ dI.SetLineColor(ROOT.kViolet)
 dJ.SetLineColor(ROOT.kMagenta)
 
 mg = ROOT.TMultiGraph()
+mg.SetTitle('Magnet Sector Averages - ' + time_interval)
 mg.Add(gA)
 mg.Add(gB)
 mg.Add(gC)
@@ -128,6 +150,7 @@ leg.AddEntry(gJ, 'Sector J', 'l')
 leg.Draw()
 
 # make a graph of the overall average
+canvas = ROOT.TCanvas('average_' + time_interval + '_canvas', 'average_' + time_interval + '_canvas', 1)
 g_avg = ROOT.TGraph()
 for i in range(gA.GetN()):
     x = ROOT.Double()
@@ -168,9 +191,11 @@ for i in range(gA.GetN()):
 
 leg.AddEntry(g_avg, 'Average', 'p')
 g_avg.Draw('p same')
+c1.SaveAs('Differences_' + time_interval + '.pdf')
 
 c2 = ROOT.TCanvas('c2', 'c2', 1)
 mgd = ROOT.TMultiGraph()
+mgd.SetTitle('Magnet Sectors: Deviation from avg - ' + time_interval)
 mgd.Add(dA)
 mgd.Add(dB)
 mgd.Add(dC)
@@ -201,3 +226,6 @@ leg2.AddEntry(dH, 'Sector H', 'l')
 leg2.AddEntry(dI, 'Sector I', 'l')
 leg2.AddEntry(dJ, 'Sector J', 'l')
 leg2.Draw()
+
+c2.SaveAs('Deviation_' + time_interval + '.pdf')
+
