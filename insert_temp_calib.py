@@ -15,14 +15,17 @@ write_to_db = True
 # create the connection to the database
 conn = psycopg2.connect("dbname=gm2_online_prod user=gm2_writer host=localhost port=5433")
 
-infile = open('CalibrationReferenceData-AirDiff.csv')
+#infile = open('CalibrationReferenceData-AirDiff.csv')
+infile = open('TempCalibration_jul2018.csv')
 
-version = '2'
+# version 2 is using the data taken in summer 2017
+# version 3 is using the data taken in summer 2018
+version = '3'
 
 for line in infile:
     if line.split(',')[1] == 'test_channel': continue
-    print "* line:",
-    print line
+    #print "* line:",
+    #print line
     splitline = line.rstrip().split(',')
     #splitline = line.split(',')
     print 'splitline:', splitline
