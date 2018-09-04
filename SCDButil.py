@@ -12,6 +12,16 @@ import sys, time, datetime
 import psycopg2
 import ROOT
 import RunDButil
+import cmath
+import time
+import math
+# imports needed for temp map
+#import imageio
+#from PIL import Image
+#import matplotlib.pyplot
+#import matplotlib.patches
+#import numpy
+
 
 class SCDButil:
     """
@@ -478,6 +488,441 @@ class SCDButil:
         gr.SetTitle(self.get_title(channel=channel, index=index))
 
         return gr
+
+    def average_temp(a,b,c,d=0):
+	#used in temp_vector-takes the inputs and makes sure they are reasonable values then averages them
+	count = 4
+	if (a<=0) or (a>50):
+		count += -1
+		a=0
+	if (b<=0) or (b>50):
+		count += -1
+		b=0
+	if (c<=0) or (c>50):
+		count += -1
+		c=0
+	if (d<=0) or (d>50):
+		count += -1
+		d=0
+	if count==0:
+		value=0
+	else:
+		value=(a+b+c+d)/count
+	return value
+
+# needs some improvements
+#  - separate out plot making and making the temp vector
+#  - add some options, like for the time range
+    def temp_vector(self, checkGood=True, time_interval='hour'):
+	#This function is meant to find the 'temperature vector' on the g-2 magnet across some time interval	
+
+	#setting up time numbers and the matricies
+	tEnd=time.time()
+	if time_interval == 'hour':
+		tStart = time.time() - 3600
+	if time_interval == 'day':
+		tStart = time.time() - 86400
+	if time_interval == 'week':
+		tStart = time.time() - 6044800
+	if time_interval == 'month':
+		tStart = time.time() - 2678400
+	if time_interval == 'year' :
+		tStart = time.time() - 3153600
+	if time_interval == 'all':
+		tStart = time.time() - 3153600
+	vector = {}
+	timetemp = {}	#Will hold time,temp of magnet A,temp B,temp C,...,temp L
+	#magnet A
+	e = 1
+	t = 0 
+	cont = True
+	cur = self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P1', checkGood=True, time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info = data[2]
+			v1 = float(slow_info[0])#top
+			v2 = float(slow_info[1])#back
+			v3 = float(slow_info[2])#bottom
+			v4 =0 #float(slow_info[3])#air
+			timetemp[t]={}
+			timetemp[t][0]=time.mktime(data[3].timetuple())
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t +=1
+	absolut = t
+	#magnet B
+	e += 1 
+	t=0
+	cont = True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P1', checkGood=True, time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info = data[2]
+			v1 = float(slow_info[0])#top
+			v2 = float(slow_info[1])#back
+			v3 = float(slow_info[2])#bottom
+			v4 = 0 #float(slow_info[3])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False	
+	#magnet C
+	e+=1
+	t=0
+	cont = True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P1', checkGood=True, time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[4])#top
+			v2=float(slow_info[5])#back
+			v3=float(slow_info[6])#bottom
+			v4=0 #float(slow_info[7])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet D
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P1',checkGood=True,time_interval=time_interval))
+	while cont:
+		data=cur.fetchone()
+		if data is None:
+			cont=False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[4])#top
+			v2=float(slow_info[5])#back
+			v3=float(slow_info[6])#bottom
+			v4=0 #float(slow_info[7])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet E
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P2',checkGood=True,time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		if data is None:
+			cont=False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[0])#top
+			v2=float(slow_info[1])#back
+			v3=float(slow_info[2])#bottom
+			v4=0 #float(slow_info[3])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet F
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P4',checkGood=True,time_interval=time_interval))
+	cur1=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P2',checkGood=True,time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		data1=cur1.fetchone()
+		if (data is None) or (data1 is None):
+			cont = False
+		else:
+			slow_info=data[2]
+			slow_info1=data1[2]
+			v1=float(slow_info[6])#top
+			v2=float(slow_info1[1])#back
+			v3=float(slow_info1[0])#bottom
+			v4=0 #float(slow_info1[3])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet G
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P2',checkGood=True,time_interval=time_interval))
+	while cont:
+		data=cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[4])#top
+			v2=float(slow_info[5])#back
+			v3=float(slow_info[6])#bottom
+			v4=0 #float(slow_info[7])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet H
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P2',checkGood=True,time_interval=time_interval))
+	while cont:
+		data=cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[4])#top
+			v2=float(slow_info[5])#back
+			v3=float(slow_info[6])#bottom
+			v4=0 #float(slow_info[7])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet I
+	e+=1
+	t=0
+	cont = True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P3',checkGood=True,time_interval=time_interval))
+	while cont:
+		data=cur.fetchone()
+		if data is None:
+			cont = False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[0])#top
+			v2=float(slow_info[1])#back
+			v3=float(slow_info[2])#bottom
+			v4=0 #float(slow_info[3])
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnetJ
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P3',checkGood=True,time_interval=time_interval))
+	while cont:
+		data=cur.fetchone()
+		if data is None:
+			cont=False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[7])#top
+			v2=float(slow_info[1])#back
+			v3=float(slow_info[2])#bottom
+			v4=0 #float(slow_info[3])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet K
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb323_Temp_P3',checkGood=True,time_interval=time_interval))
+	while cont:
+		data =cur.fetchone()
+		if data is None:
+			cont=False
+		else:
+			slow_info=data[2]
+			v1=float(slow_info[4])#top
+			v2=float(slow_info[5])#back
+			v3=float(slow_info[6])#bottom
+			v4=0 #float(slow_info[7])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#magnet L
+	e+=1
+	t=0
+	cont=True
+	cur=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P4',checkGood=True,time_interval=time_interval))
+	cur1=self.execute_query(self.generate_sql_channel(channel='mscb13e_Temp_P3',checkGood=True,time_interval=time_interval))
+	while cont:
+		data = cur.fetchone()
+		data1 = cur1.fetchone()
+		if (data is None) or (data1 is None):
+			cont=False
+		else:
+			slow_info=data[2]
+			slow_info1=data1[2]
+			v1=float(slow_info[1])#top
+			v2=float(slow_info[2])#back
+			v3=float(slow_info1[5])#bottom
+			v4=0 #float(slow_info[4])#air
+			timetemp[t][e]=self.average_temp(v1,v2,v3)
+			t+=1
+			if t==absolut:
+				cont=False
+	#Puts all the timetemp data into vector. If one of the sensors was bad, the whole vector just gets sent to 0
+	t=0
+	while t<absolut:
+		if t in timetemp:
+			vector[t]={}
+			bad_sensor = False
+			i=1 		#We don't want to include the time compent when looking for bad_sensor
+
+			while i< 12:
+				if not(i in timetemp[t]):
+					bad_sensor=True
+					break
+				if (timetemp[t][i]>50) or (timetemp[t][i] < 0):
+					bad_sensor =True
+				i +=1
+			j=1
+			vector[t][0] = timetemp[t][0]
+			vector[t][1] = 0
+			vector[t][2] = 0
+			if bad_sensor==False:
+				while j <13:
+					vector[t][1] += cmath.cos(j*cmath.pi/6)*timetemp[t][j]	#x-component
+					vector[t][2] += cmath.sin(j*cmath.pi/6)*timetemp[t][j]	#y-component
+					j +=1
+			t+=1
+
+	#converts x/y vector to r/theta. Theta is in radians
+	t=0
+	while t<absolut:
+		xsum = vector[t][1]
+		ysum = vector[t][2]
+		r = cmath.sqrt(xsum**2+ysum**2)
+		theta =0
+		if r != 0:
+			if xsum!=0:
+				theta = cmath.atan(ysum/xsum)	
+			elif (ysum.real)>0:
+				theta = cmath.pi*1/2
+			elif (ysum.real)<0:
+				theta = cmath.pi*3/2
+		vector[t][1] = r
+		vector[t][2] = theta
+		t+=1
+
+	#makes time v temp graphs
+	n=0
+	while n in vector:
+		n+=1
+	time_list=[0]*n
+	rad_list=[0]*n
+	theta_list=[0]*n
+	t=0
+	while t<n:
+		time_list[t]=vector[t][0]
+		rad_list[t]=vector[t][1].real
+		theta_list[t]=vector[t][2].real
+		t+=1
+	
+	#Magnitude vs time
+	can =ROOT.TCanvas('can','magnitude_vs_time', 200, 10, 700, 500)
+	can.SetGrid()
+	rad_gr = ROOT.TGraph()	
+	rad_gr.SetTitle('magnitude versus time')
+	rad_gr.GetXaxis().SetTitle('Time')
+	rad_gr.GetYaxis().SetTitle('Magnitude (celsius)')
+	t=0
+	while t<n:
+		rad_gr.SetPoint(t,time_list[t],rad_list[t])
+		t+=1
+	rad_gr.GetXaxis().SetTimeDisplay(1)
+	rad_gr.GetXaxis().SetTimeFormat('#splitline{%b-%d}{%H:%M}')
+	rad_gr.Draw('ap')
+	can.Modified()
+	can.Update()
+	can.SaveAs('magnitude_vs_time.png')
+
+	#Direction vs time graph
+	can1 = ROOT.TCanvas('can1', 'direction_vs_time', 200, 10, 700, 500)
+	can1.SetGrid()
+	theta_gr = ROOT.TGraph()	
+	theta_gr.SetTitle('direction v. time')
+	theta_gr.GetXaxis().SetTitle('Time')
+	theta_gr.GetYaxis().SetTitle('Direction (radians)')
+	t=0
+	while t<n:
+		theta_gr.SetPoint(t,time_list[t],theta_list[t])
+		t+=1
+	theta_gr.GetXaxis().SetTimeDisplay(1)
+	theta_gr.GetXaxis().SetTimeFormat('#splitline{%b-%d}{%H:%M}')
+	theta_gr.Draw('ap')
+	can1.Modified()
+	can1.Update()
+	can1.SaveAs('direction_vs_time.png')
+	return timetemp
+
+# need to refactor the temp_map() method. Depends on several
+# imports that don't play nice on SLF6
+	#temperature map gif
+    def temp_map(self,timetemp):
+	n=0
+	while n in timetemp:
+		n+=1
+	images=[]
+	t=0
+	fg, ax = matplotlib.pyplot.subplots(1,1)
+	ax.axis([-50,50,-25,25])
+	ax.axis('off')
+	while t<n:
+		print t		
+		i=2
+		max_temp=timetemp[t][1]
+		min_temp=timetemp[t][1]
+		while i<13:
+			if timetemp[t][i]>max_temp:
+				max_temp=timetemp[t][i]
+			if timetemp[t][i]<min_temp:
+				min_temp=timetemp[t][i]
+			i+=1
+		i=1
+		while i<13:
+			end  = 85+i*30
+			start = 65+i*30
+			radius=35
+			#sectors A,B,C are in quadrant 2, J,K,L in quadrant 1. If you stand at the stairs into the ring, the sectors are in the same configuration but flipped about the y axis
+
+			#choose color
+			absol_temp=(timetemp[t][i]-20)/10
+			if (absol_temp<0) or (absol_temp>1):
+				temp_color=[0,0,0] # if temperature is less than 0 or greater than 50
+			else:
+				red=absol_temp
+				green=0
+				blue=1-absol_temp
+				absol_color=[red,green,blue]
+			relat_temp=(timetemp[t][i]-min_temp)/(max_temp-min_temp)
+			relat_color=[relat_temp,0,1-relat_temp]
+
+			#draw
+			while radius<41:
+				ax.add_patch(matplotlib.patches.Arc([-25,0],radius,radius,angle=0, theta1=start,theta2=end,color=absol_color))
+				ax.add_patch(matplotlib.patches.Arc([25,0],radius,radius,angle=0,theta1=start,theta2=end,color=relat_color))
+				radius+=1
+			ax.set_aspect("equal")
+			fg.canvas.draw()
+			i+=1
+		#save the image in images[] and destroy the used drawing
+		images.append(fg)
+		matplotlib.pyplot.show(fg)
+#		matplotlib.pyplot.close(fg) 	#closes the image, slow
+		matplotlib.pyplot.clf()  #clears the image, but opening to many images causes an error
+		t+=10
+#	image_array=numpy.array(images)
+	tempmap = imageio.mimsave('temp_map.gif',numpy.array(images))
+	return tempmap 
+
+
 
     def plot_channels(self, subchannel_list, checkGood=True, time_interval='all', title='', scale_overflow=True, fixed_scale=False, draw_legend=True):
         graphs = []
