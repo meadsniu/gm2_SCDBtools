@@ -88,7 +88,8 @@ class SCDButil:
                    ('mscb110_Temp_P1', 3):ROOT.kBlue,
                    ('mscb110_Temp_P1', 4):ROOT.kBlue+1,
                    ('mscb110_Temp_P1', 5):ROOT.kBlue+2,
-                   ('mscb110_Temp_P1', 6):ROOT.kBlue+3, 
+                   ('mscb110_Temp_P1', 6):ROOT.kBlue+3,
+                   ('mscb110_Temp_P1', 7):ROOT.kOrange,
                    ('mscb13e_ADC_P0', 2):ROOT.kBlue,
                    ('mscb174_ADC_P0', 7):ROOT.kBlue+1,
                    ('mscb110_ADC_P0', 1):ROOT.kBlue+2,
@@ -130,7 +131,7 @@ class SCDButil:
     subchannel_dict['hall'] = [ ('mscb174_Temp_P1', 4), ('mscb174_Temp_P1', 5), ('mscb174_Temp_P1', 6), ('mscb174_Temp_P1', 7), ('mscb174_Temp_P5', 0), ('mscb174_Temp_P5', 1), ('mscb174_Temp_P5', 2), ('mscb174_Temp_P5', 3), ('mscb174_Temp_P5', 4), ('mscb174_Temp_P5', 5), ('mscb174_Temp_P5', 6), ('mscb174_Temp_P5', 7) ]
     subchannel_dict['hall_outside'] = [ ('mscb174_Temp_P1', 4), ('mscb174_Temp_P1', 5), ('mscb174_Temp_P1', 6), ('mscb174_Temp_P1', 7), ('mscb174_Temp_P5', 0), ('mscb174_Temp_P5', 1), ('mscb174_Temp_P5', 2), ('mscb174_Temp_P5', 3), ('mscb174_Temp_P5', 4), ('mscb174_Temp_P5', 5), ('mscb174_Temp_P5', 6), ('mscb174_Temp_P5', 7), ('acnet_weather_gtemp', 0)]
     subchannel_dict['laser_hut'] = [ ('mscb174_Temp_P7', 0), ('mscb174_Temp_P7', 1) ]
-    subchannel_dict['computer_room'] = [ ('mscb110_Temp_P1', 0), ('mscb110_Temp_P1', 1), ('mscb110_Temp_P1', 2), ('mscb110_Temp_P1', 3), ('mscb110_Temp_P1', 4), ('mscb110_Temp_P1', 5), ('mscb110_Temp_P1', 6) ]
+    subchannel_dict['computer_room'] = [ ('mscb110_Temp_P1', 0), ('mscb110_Temp_P1', 1), ('mscb110_Temp_P1', 2), ('mscb110_Temp_P1', 3), ('mscb110_Temp_P1', 4), ('mscb110_Temp_P1', 5), ('mscb110_Temp_P1', 6), ('mscb110_Temp_P1', 7) ]
     subchannel_dict['magnetA'] = [ ('mscb323_Temp_P1', 0), ('mscb323_Temp_P1', 1), ('mscb323_Temp_P1', 2), ('mscb323_Temp_P1', 3) ]
     subchannel_dict['magnetB'] = [ ('mscb13e_Temp_P1', 0), ('mscb13e_Temp_P1', 1), ('mscb13e_Temp_P1', 2), ('mscb13e_Temp_P1', 3) ]
     subchannel_dict['magnetC'] = [ ('mscb323_Temp_P1', 4), ('mscb323_Temp_P1', 5), ('mscb323_Temp_P1', 6), ('mscb323_Temp_P1', 7) ]
